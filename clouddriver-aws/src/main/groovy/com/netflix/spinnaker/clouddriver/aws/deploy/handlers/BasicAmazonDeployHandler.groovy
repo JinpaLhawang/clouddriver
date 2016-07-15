@@ -38,6 +38,7 @@ import com.netflix.spinnaker.clouddriver.aws.deploy.description.BasicAmazonDeplo
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.loadbalancer.UpsertAmazonLoadBalancerResult
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
 import com.netflix.spinnaker.clouddriver.aws.services.RegionScopedProviderFactory
+import groovy.json.JsonBuilder
 import groovy.transform.PackageScope
 
 class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescription> {
@@ -186,8 +187,11 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
         }
       }
 
+      String deviceMappingMetadata = 'custom'
+
       if (description.blockDevices == null) {
         description.blockDevices = BlockDeviceConfig.blockDevicesByInstanceType[description.instanceType]
+        deviceMappingMetadata = 'default'
       }
       ResolvedAmiResult ami = priorOutputs.find({
         it instanceof ResolvedAmiResult && it.region == region && it.amiName == description.amiName
@@ -205,7 +209,15 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
 
       if (description.useAmiBlockDeviceMappings) {
         description.blockDevices = convertBlockDevices(ami.blockDeviceMappings)
+        deviceMappingMetadata = 'ami'
       }
+
+      if (!description.tags) {
+        description.tags = new HashMap<String, String>()
+      }
+      def json = new JsonBuilder()
+      json deviceMapping: deviceMappingMetadata
+      description.tags.put('spinnaker:deploymentMetadata', json.toString())
 
       def autoScalingWorker = new AutoScalingWorker(
         application: description.application,

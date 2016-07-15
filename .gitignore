@@ -11,3 +11,7 @@ application.yml
 *.hprof
 README.html
 *~
+.classpath
+.project
+.settings/
+bin/
