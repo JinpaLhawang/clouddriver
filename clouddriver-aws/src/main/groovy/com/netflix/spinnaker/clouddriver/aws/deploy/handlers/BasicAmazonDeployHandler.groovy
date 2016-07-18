@@ -213,11 +213,11 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
       }
 
       if (!description.tags) {
-        description.tags = new HashMap<String, String>()
+        description.tags = [:]
       }
       def json = new JsonBuilder()
       json deviceMapping: deviceMappingMetadata
-      description.tags.put('spinnaker:deploymentMetadata', json.toString())
+      description.tags['spinnaker:deploymentMetadata'] = json.toString()
 
       def autoScalingWorker = new AutoScalingWorker(
         application: description.application,
