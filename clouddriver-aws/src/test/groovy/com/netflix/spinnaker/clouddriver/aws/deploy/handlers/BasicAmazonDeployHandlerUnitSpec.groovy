@@ -174,13 +174,13 @@ class BasicAmazonDeployHandlerUnitSpec extends Specification {
     actualClassicLinkVpcId == null
   }
 
-  void "should append spinnaker:deploymentMetadata tag indicating deviceMapping"() {
+  void 'should append spinnaker:deploymentMetadata tag indicating deviceMapping'() {
     setup:
     def description = new BasicAmazonDeployDescription(
-      amiName: "ami-12345",
-      availabilityZones: ["us-west-1": []],
+      amiName: 'ami-12345',
+      availabilityZones: ['us-west-1': []],
       credentials: TestCredential.named('baz'),
-      subnetType: "internal",
+      subnetType: 'internal',
       useAmiBlockDeviceMappings: testUseAmiBlockDeviceMappings,
       blockDevices: testBlockDevices
     )
@@ -189,14 +189,14 @@ class BasicAmazonDeployHandlerUnitSpec extends Specification {
     handler.handle(description, [])
 
     then:
-    description.tags.get("spinnaker:deploymentMetadata") == expectedDeploymentMetadata
+    description.tags['spinnaker:deploymentMetadata'] == expectedDeploymentMetadata
 
     where:
     testUseAmiBlockDeviceMappings | testBlockDevices                                           | expectedDeploymentMetadata
-    true                          | null                                                       | "{\"deviceMapping\":\"ami\"}"     // Prefer AMI Block Device Mappings set, set deviceMapping as 'ami'
-    true                          | [new AmazonBlockDevice(deviceName: "/dev/sdb", size: 125)] | "{\"deviceMapping\":\"ami\"}"     // Even though blockDevices set, Prefer AMI Block Device Mappings overrides, set deviceMapping as 'ami'
-    false                         | [new AmazonBlockDevice(deviceName: "/dev/sdb", size: 125)] | "{\"deviceMapping\":\"custom\"}"  // blockDevices set, set deviceMapping as 'custom'
-    false                         | null                                                       | "{\"deviceMapping\":\"default\"}" // blockDevices not set, set deviceMapping as 'default'
+    true                          | null                                                       | '{"deviceMapping":"ami"}'     // Prefer AMI Block Device Mappings set, set deviceMapping as 'ami'
+    true                          | [new AmazonBlockDevice(deviceName: '/dev/sdb', size: 125)] | '{"deviceMapping":"ami"}'     // Even though blockDevices set, Prefer AMI Block Device Mappings overrides, set deviceMapping as 'ami'
+    false                         | [new AmazonBlockDevice(deviceName: '/dev/sdb', size: 125)] | '{"deviceMapping":"custom"}'  // blockDevices set, set deviceMapping as 'custom'
+    false                         | null                                                       | '{"deviceMapping":"default"}' // blockDevices not set, set deviceMapping as 'default'
   }
 
   void "should send instance class block devices to AutoScalingWorker when matched and none are specified"() {
